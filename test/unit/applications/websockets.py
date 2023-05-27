@@ -177,11 +177,7 @@ class TestApplicationWebsocket(TestApplicationProto):
             mask_bits = struct.pack('!I', random.getrandbits(32))
             frame += mask_bits
 
-        if mask:
-            frame += self.apply_mask(data, mask_bits)
-        else:
-            frame += data
-
+        frame += self.apply_mask(data, mask_bits) if mask else data
         return frame
 
     def frame_write(self, sock, *args, **kwargs):

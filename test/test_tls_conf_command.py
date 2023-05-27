@@ -38,7 +38,7 @@ class TestTLSConfCommand(TestApplicationTLS):
         (_, sock) = self.get_ssl(start=True)
 
         shared_ciphers = sock.shared_ciphers()
-        protocols = list(set(c[1] for c in shared_ciphers))
+        protocols = list({c[1] for c in shared_ciphers})
         protocol = sock.cipher()[1]
 
         if '/' in protocol:
@@ -61,7 +61,7 @@ class TestTLSConfCommand(TestApplicationTLS):
             assert cipher[1] != protocol, 'new protocol used'
 
             shared_ciphers = sock.shared_ciphers()
-            ciphers = list(set(c for c in shared_ciphers if c[1] == cipher[1]))
+            ciphers = list({c for c in shared_ciphers if c[1] == cipher[1]})
 
             sock.close()
         else:

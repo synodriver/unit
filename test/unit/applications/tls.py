@@ -64,11 +64,7 @@ class TestApplicationTLS(TestApplicationProto):
         for i, k in enumerate(alt_names, 1):
             k = k.split('|')
 
-            if k[0] == 'IP':
-                a_names += f'IP.{i} = {k[1]}\n'
-            else:
-                a_names += f'DNS.{i} = {k[0]}\n'
-
+            a_names += f'IP.{i} = {k[1]}\n' if k[0] == 'IP' else f'DNS.{i} = {k[0]}\n'
         # Generates section for sign request extension
         a_sec = f'''req_extensions = myca_req_extensions
 

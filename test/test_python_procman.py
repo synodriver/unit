@@ -22,13 +22,12 @@ class TestPythonProcman(TestApplicationPython):
 
         output = subprocess.check_output(['ps', 'ax'])
 
-        pids = set()
-        for m in re.findall(
-            fr'.*unit: "{self.app_name}" application', output.decode()
-        ):
-            pids.add(re.search(r'^\s*(\d+)', m).group(1))
-
-        return pids
+        return {
+            re.search(r'^\s*(\d+)', m)[1]
+            for m in re.findall(
+                fr'.*unit: "{self.app_name}" application', output.decode()
+            )
+        }
 
     def conf_proc(self, conf, path=None):
         if path is None:

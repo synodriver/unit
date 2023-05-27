@@ -154,6 +154,5 @@ def check_isolation():
                 ] = True
 
     for ns in allns:
-        ns_value = getns(ns)
-        if ns_value:
+        if ns_value := getns(ns):
             available['features']['isolation'][ns] = ns_value

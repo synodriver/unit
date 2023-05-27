@@ -19,9 +19,7 @@ class TestPythonIsolation(TestApplicationPython):
             ['ps', 'ax', '-o', 'pid', '-o', 'cmd']
         ).decode()
 
-        pid = re.search(
-            fr'(\d+)\s*unit: "{app_name}" application', output
-        ).group(1)
+        pid = re.search(fr'(\d+)\s*unit: "{app_name}" application', output)[1]
 
         cgroup = f'/proc/{pid}/cgroup'
 
@@ -35,7 +33,7 @@ class TestPythonIsolation(TestApplicationPython):
         isolation_features = option.available['features']['isolation'].keys()
 
         if not is_su:
-            if not 'unprivileged_userns_clone' in isolation_features:
+            if 'unprivileged_userns_clone' not in isolation_features:
                 pytest.skip('requires unprivileged userns or root')
 
             if 'user' not in isolation_features:
@@ -127,7 +125,7 @@ class TestPythonIsolation(TestApplicationPython):
         if not is_su:
             pytest.skip('requires root')
 
-        if not 'cgroup' in option.available['features']['isolation']:
+        if 'cgroup' not in option.available['features']['isolation']:
             pytest.skip('cgroup is not supported')
 
         def set_cgroup_path(path):
@@ -150,7 +148,7 @@ class TestPythonIsolation(TestApplicationPython):
         if not is_su:
             pytest.skip('requires root')
 
-        if not 'cgroup' in option.available['features']['isolation']:
+        if 'cgroup' not in option.available['features']['isolation']:
             pytest.skip('cgroup is not supported')
 
         def set_two_cgroup_path(path, path2):
@@ -197,7 +195,7 @@ class TestPythonIsolation(TestApplicationPython):
         if not is_su:
             pytest.skip('requires root')
 
-        if not 'cgroup' in option.available['features']['isolation']:
+        if 'cgroup' not in option.available['features']['isolation']:
             pytest.skip('cgroup is not supported')
 
         def check_invalid(path):

@@ -25,13 +25,7 @@ def public_dir(path):
 
 def waitforfiles(*files, timeout=50):
     for _ in range(timeout):
-        wait = False
-
-        for f in files:
-            if not os.path.exists(f):
-                wait = True
-                break
-
+        wait = any(not os.path.exists(f) for f in files)
         if not wait:
             return True
 
@@ -42,11 +36,7 @@ def waitforfiles(*files, timeout=50):
 
 def waitforglob(pattern, count=1, timeout=50):
     for _ in range(timeout):
-        n = 0
-
-        for _ in glob.glob(pattern):
-            n += 1
-
+        n = len(glob.glob(pattern))
         if n == count:
             return True
 
@@ -126,9 +116,8 @@ def getns(nstype):
     # it points to: '<nstype>:[<ns id>]'
     # # eg.: 'pid:[4026531836]'
     nspath = f'/proc/self/ns/{nstype}'
-    data = None
-
-    if os.path.exists(nspath):
-        data = int(os.readlink(nspath)[len(nstype) + 2 : -1])
-
-    return data
+    return (
+        int(os.readlink(nspath)[len(nstype) + 2 : -1])
+        if os.path.exists(nspath)
+        else None
+    )

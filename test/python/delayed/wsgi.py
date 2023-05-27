@@ -14,7 +14,7 @@ def application(environ, start_response):
         time.sleep(delay)
         return []
 
-    step = int(len(body) / parts)
+    step = len(body) // parts
     for i in range(0, len(body), step):
         try:
             write(body[i : i + step])
