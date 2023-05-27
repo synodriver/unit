@@ -70,21 +70,17 @@ class TestProxyChunked(TestApplicationPython):
 
             m = re.search('\x0d\x0a\x0d\x0a(.*)', data, re.M | re.S)
             if m is not None:
-                body = m.group(1)
+                body = m[1]
 
                 for line in re.split('\r\n', body):
                     add = ''
                     m1 = re.search(r'(.*)\sX\s(\d+)', line)
 
-                    if m1 is not None:
-                        add = m1.group(1) * int(m1.group(2))
-                    else:
-                        add = line
-
+                    add = m1[1] * int(m1[2]) if m1 is not None else line
                     req = f'{req}{add}\r\n'
 
             for chunk in re.split(r'([@#])', req):
-                if chunk == '@' or chunk == '#':
+                if chunk in ['@', '#']:
                     if chunk == '#':
                         time.sleep(0.1)
                     continue

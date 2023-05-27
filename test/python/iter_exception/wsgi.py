@@ -13,10 +13,7 @@ class application:
         )
         self._is_chunked = self.environ.get('HTTP_X_CHUNKED')
 
-        headers = [(('Content-Length', '10'))]
-        if self._is_chunked is not None:
-            headers = []
-
+        headers = [] if self._is_chunked is not None else [(('Content-Length', '10'))]
         if self._skip_level < 1:
             raise Exception('first exception')
 

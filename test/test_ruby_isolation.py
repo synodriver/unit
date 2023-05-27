@@ -10,7 +10,7 @@ class TestRubyIsolation(TestApplicationRuby):
         isolation_features = option.available['features']['isolation'].keys()
 
         if not is_su:
-            if not 'unprivileged_userns_clone' in isolation_features:
+            if 'unprivileged_userns_clone' not in isolation_features:
                 pytest.skip('requires unprivileged userns or root')
 
             if 'user' not in isolation_features:

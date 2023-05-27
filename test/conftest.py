@@ -135,7 +135,7 @@ def pytest_generate_tests(metafunc):
     cls = metafunc.cls
     if (
         not hasattr(cls, 'application_type')
-        or cls.application_type == None
+        or cls.application_type is None
         or cls.application_type == 'external'
     ):
         return
@@ -258,12 +258,11 @@ def check_prerequisites(request):
     if 'modules' in cls.prerequisites:
         available_modules = list(option.available['modules'].keys())
 
-        for module in cls.prerequisites['modules']:
-            if module in available_modules:
-                continue
-
-            missed.append(module)
-
+        missed.extend(
+            module
+            for module in cls.prerequisites['modules']
+            if module not in available_modules
+        )
     if missed:
         pytest.skip(f'Unit has no {", ".join(missed)} module(s)')
 
@@ -272,12 +271,11 @@ def check_prerequisites(request):
     if 'features' in cls.prerequisites:
         available_features = list(option.available['features'].keys())
 
-        for feature in cls.prerequisites['features']:
-            if feature in available_features:
-                continue
-
-            missed.append(feature)
-
+        missed.extend(
+            feature
+            for feature in cls.prerequisites['features']
+            if feature not in available_features
+        )
     if missed:
         pytest.skip(f'{", ".join(missed)} feature(s) not supported')
 
@@ -452,8 +450,7 @@ def unit_stop():
     p.send_signal(signal.SIGQUIT)
 
     try:
-        retcode = p.wait(15)
-        if retcode:
+        if retcode := p.wait(15):
             return f'Child process terminated with code {retcode}'
 
     except KeyboardInterrupt:
@@ -619,7 +616,7 @@ def _check_processes():
         if re.search(fr'{controller_pid}\s+{unit_pid}.*unit: controller', l)
         is None
     ]
-    assert len(out) == 0, 'one controller'
+    assert not out, 'one controller'
 
 
 @print_log_on_assert
@@ -722,7 +719,7 @@ def stop_processes():
 def pid_by_name(name):
     output = subprocess.check_output(['ps', 'ax', '-O', 'ppid']).decode()
     m = re.search(fr'\s*(\d+)\s*{unit_instance["pid"]}.*{name}', output)
-    return None if m is None else m.group(1)
+    return None if m is None else m[1]
 
 
 def find_proc(name, ps_output):

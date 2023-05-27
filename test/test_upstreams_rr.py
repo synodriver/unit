@@ -50,7 +50,7 @@ class TestUpstreamsRR(TestApplicationPython):
 
         for _ in range(req):
             status = self.get(port=port)['status']
-            if 200 > status or status > 209:
+            if status < 200 or status > 209:
                 continue
 
             ups = status % 10
@@ -81,8 +81,8 @@ Connection: close
         ups = list(map(lambda x: int(x[-1]), status))
 
         resps = [0] * (max(ups) + 1)
-        for i in range(len(ups)):
-            resps[ups[i]] += 1
+        for up in ups:
+            resps[up] += 1
 
         return resps
 
@@ -310,7 +310,7 @@ Connection: close
 
             m = re.search(r'HTTP/1.1 20(\d)', resp)
             assert m is not None, 'status'
-            resps[int(m.group(1))] += 1
+            resps[int(m[1])] += 1
 
         assert sum(resps) == req, 'delay sum'
         assert abs(resps[0] - resps[1]) <= self.cpu_count, 'delay'

@@ -75,9 +75,8 @@ class TestApplicationJava(TestApplicationProto):
                 classes_path,
                 '-classpath',
                 f'{classpath}:{ws_jars[0]}',
+                *src,
             ]
-            javac.extend(src)
-
             if option.detailed:
                 print(f'\n$ {" ".join(javac)}')
 

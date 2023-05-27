@@ -25,7 +25,7 @@ class TestRespawn(TestApplicationPython):
     def pid_by_name(self, name, ppid):
         output = subprocess.check_output(['ps', 'ax', '-O', 'ppid']).decode()
         m = re.search(fr'\s*(\d+)\s*{ppid}.*{name}', output)
-        return None if m is None else m.group(1)
+        return None if m is None else m[1]
 
     def kill_pids(self, *pids):
         subprocess.call(['kill', '-9', *pids])

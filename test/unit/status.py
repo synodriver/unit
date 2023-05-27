@@ -17,9 +17,9 @@ class Status:
             'applications': {},
         }
 
-    def init(status=None):
+    def init(self):
         Status._status = (
-            status if status is not None else Status.control.conf_get('/status')
+            self if self is not None else Status.control.conf_get('/status')
         )
 
     def diff():
@@ -35,11 +35,11 @@ class Status:
 
         return find_diffs(Status.control.conf_get('/status'), Status._status)
 
-    def get(path='/'):
-        path = path.split('/')[1:]
+    def get(self):
+        self = self.split('/')[1:]
         diff = Status.diff()
 
-        for p in path:
+        for p in self:
             diff = diff[p]
 
         return diff

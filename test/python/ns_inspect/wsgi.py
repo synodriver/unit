@@ -10,14 +10,9 @@ except ImportError:
 
 
 def application(environ, start_response):
-    ret = {
-        'FileExists': False,
-    }
-
     d = parse_qs(environ['QUERY_STRING'])
 
-    ret['FileExists'] = os.path.exists(d.get('path')[0])
-
+    ret = {'FileExists': os.path.exists(d.get('path')[0])}
     out = json.dumps(ret)
 
     start_response(

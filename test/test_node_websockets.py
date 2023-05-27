@@ -1284,21 +1284,13 @@ class TestNodeWebsockets(TestApplicationNode):
         op_binary = self.ws.OP_BINARY
 
         def check_payload(opcode, length, chopsize=None):
-            if opcode == self.ws.OP_TEXT:
-                payload = '*' * length
-            else:
-                payload = b'*' * length
-
+            payload = '*' * length if opcode == self.ws.OP_TEXT else b'*' * length
             self.ws.frame_write(sock, opcode, payload, chopsize=chopsize)
             frame = self.ws.frame_read(sock, read_timeout=5)
             self.check_frame(frame, True, opcode, payload)
 
         def check_message(opcode, f_size):
-            if opcode == self.ws.OP_TEXT:
-                payload = '*' * 4 * 2**20
-            else:
-                payload = b'*' * 4 * 2**20
-
+            payload = '*' * 4 * 2**20 if opcode == self.ws.OP_TEXT else b'*' * 4 * 2**20
             self.ws.message(sock, opcode, payload, fragmention_size=f_size)
             frame = self.ws.frame_read(sock, read_timeout=5)
             self.check_frame(frame, True, opcode, payload)
@@ -1317,7 +1309,7 @@ class TestNodeWebsockets(TestApplicationNode):
         check_payload(op_binary, 8 * 2**20)  # 9_2_5
         check_payload(op_binary, 16 * 2**20)  # 9_2_6
 
-        if option.system != 'Darwin' and option.system != 'FreeBSD':
+        if option.system not in ['Darwin', 'FreeBSD']:
             check_message(op_text, 64)  # 9_3_1
             check_message(op_text, 256)  # 9_3_2
             check_message(op_text, 2**10)  # 9_3_3

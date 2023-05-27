@@ -176,7 +176,7 @@ class TestNodeApplication(TestApplicationNode):
         )
         assert resp['headers']['Was-Header'] == 'true', 'was header'
         assert resp['headers']['Has-Header'] == 'false', 'has header'
-        assert not ('X-Header' in resp['headers']), 'remove header'
+        assert 'X-Header' not in resp['headers'], 'remove header'
 
     def test_node_application_remove_header_nonexisting(self):
         self.load('remove_header')

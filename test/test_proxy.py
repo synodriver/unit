@@ -86,7 +86,7 @@ Content-Length: 10
 
             m = re.search(r'X-Len: (\d+)', data)
             if m:
-                to_send += b'X' * int(m.group(1))
+                to_send += b'X' * int(m[1])
 
             connection.sendall(to_send)
 

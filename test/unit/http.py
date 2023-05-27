@@ -15,33 +15,26 @@ class TestHTTP:
         sock_type = kwargs.get('sock_type', 'ipv4')
         port = kwargs.get('port', 7080)
         url = kwargs.get('url', '/')
-        http = 'HTTP/1.0' if 'http_10' in kwargs else 'HTTP/1.1'
-
         headers = kwargs.get(
             'headers', {'Host': 'localhost', 'Connection': 'close'}
         )
 
         body = kwargs.get('body', b'')
-        crlf = '\r\n'
-
         if 'addr' not in kwargs:
             addr = '::1' if sock_type == 'ipv6' else '127.0.0.1'
         else:
             addr = kwargs['addr']
 
-        sock_types = {
-            'ipv4': socket.AF_INET,
-            'ipv6': socket.AF_INET6,
-            'unix': socket.AF_UNIX,
-        }
-
         if 'sock' not in kwargs:
+            sock_types = {
+                'ipv4': socket.AF_INET,
+                'ipv6': socket.AF_INET6,
+                'unix': socket.AF_UNIX,
+            }
+
             sock = socket.socket(sock_types[sock_type], socket.SOCK_STREAM)
 
-            if (
-                sock_type == sock_types['ipv4']
-                or sock_type == sock_types['ipv6']
-            ):
+            if sock_type in [sock_types['ipv4'], sock_types['ipv6']]:
                 sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             if 'wrapper' in kwargs:
@@ -59,6 +52,10 @@ class TestHTTP:
             sock = kwargs['sock']
 
         if 'raw' not in kwargs:
+            http = 'HTTP/1.0' if 'http_10' in kwargs else 'HTTP/1.1'
+
+            crlf = '\r\n'
+
             req = f'{start_str} {url} {http}{crlf}'
 
             if body != b'':
@@ -93,21 +90,20 @@ class TestHTTP:
 
         resp = ''
 
-        if 'no_recv' not in kwargs:
-            recvall_kwargs = {}
-
-            if 'read_timeout' in kwargs:
-                recvall_kwargs['read_timeout'] = kwargs['read_timeout']
-
-            if 'read_buffer_size' in kwargs:
-                recvall_kwargs['buff_size'] = kwargs['read_buffer_size']
-
-            resp = self.recvall(sock, **recvall_kwargs).decode(
-                encoding, errors='ignore'
-            )
-
-        else:
+        if 'no_recv' in kwargs:
             return sock
+
+        recvall_kwargs = {}
+
+        if 'read_timeout' in kwargs:
+            recvall_kwargs['read_timeout'] = kwargs['read_timeout']
+
+        if 'read_buffer_size' in kwargs:
+            recvall_kwargs['buff_size'] = kwargs['read_buffer_size']
+
+        resp = self.recvall(sock, **recvall_kwargs).decode(
+            encoding, errors='ignore'
+        )
 
         self.log_in(resp)
 
@@ -213,25 +209,23 @@ class TestHTTP:
         if not m:
             return {}
 
-        headers_text, body = m.group(1), m.group(2)
+        headers_text, body = m[1], m[2]
         headers_lines = re.findall('(.*?)\x0d\x0a?', headers_text, re.M | re.S)
 
-        status = re.search(
-            r'^HTTP\/\d\.\d\s(\d+)|$', headers_lines.pop(0)
-        ).group(1)
+        status = re.search(r'^HTTP\/\d\.\d\s(\d+)|$', headers_lines.pop(0))[1]
 
         headers = {}
         for line in headers_lines:
             m = re.search(r'(.*)\:\s(.*)', line)
 
-            if m.group(1) not in headers:
-                headers[m.group(1)] = m.group(2)
+            if m[1] not in headers:
+                headers[m[1]] = m[2]
 
-            elif isinstance(headers[m.group(1)], list):
-                headers[m.group(1)].append(m.group(2))
+            elif isinstance(headers[m[1]], list):
+                headers[m[1]].append(m[2])
 
             else:
-                headers[m.group(1)] = [headers[m.group(1)], m.group(2)]
+                headers[m[1]] = [headers[m[1]], m[2]]
 
         return {'status': int(status), 'headers': headers, 'body': body}
 
@@ -293,13 +287,7 @@ class TestHTTP:
         return self.get(json=True, **kwargs)
 
     def form_encode(self, fields):
-        is_multipart = False
-
-        for _, value in fields.items():
-            if isinstance(value, dict):
-                is_multipart = True
-                break
-
+        is_multipart = any(isinstance(value, dict) for _, value in fields.items())
         if is_multipart:
             body, content_type = self.multipart_encode(fields)
 

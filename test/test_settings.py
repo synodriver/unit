@@ -269,7 +269,7 @@ Connection: close
         )
         values = [int(v) for v in values]
 
-        data_len = 1048576 if len(values) == 0 else 10 * max(values)
+        data_len = 1048576 if not values else 10 * max(values)
 
         addr = f'{temp_dir}/sock'
 

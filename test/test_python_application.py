@@ -682,10 +682,7 @@ last line: 987654321
 
         assert self.get(sock=sock) == {}, 'closed connection'
 
-        # Exception after first write(), before first __next__(),
-        # chunked (incomplete body).
-
-        resp = self.get(
+        if resp := self.get(
             headers={
                 'Host': 'localhost',
                 'X-Skip': '2',
@@ -693,8 +690,7 @@ last line: 987654321
                 'Connection': 'close',
             },
             raw_resp=True,
-        )
-        if resp:
+        ):
             assert resp[-5:] != '0\r\n\r\n', 'incomplete body'
         assert len(self.findall(r'Traceback')) == 4, 'traceback count 4'
 
@@ -717,9 +713,7 @@ last line: 987654321
 
         assert self.get(sock=sock) == {}, 'closed connection 2'
 
-        # Exception in __next__(), chunked (incomplete body).
-
-        resp = self.get(
+        if resp := self.get(
             headers={
                 'Host': 'localhost',
                 'X-Skip': '3',
@@ -727,8 +721,7 @@ last line: 987654321
                 'Connection': 'close',
             },
             raw_resp=True,
-        )
-        if resp:
+        ):
             assert resp[-5:] != '0\r\n\r\n', 'incomplete body 2'
         assert len(self.findall(r'Traceback')) == 6, 'traceback count 6'
 
